@@ -1,24 +1,12 @@
 <template>
-	<div>
+	<div class="grid-wrapper" :class="{'gomoku' : isGomoku}">
 		<div class="gameStatus" :class="gameStatusColor">
 			{{ gameStatusMessage }}
 		</div>
 		<table class="grid">
-		  <tr>
-		    <cell name="1" :mark="cells[1]"></cell>
-		    <cell name="2" :mark="cells[2]"></cell>
-		    <cell name="3" :mark="cells[3]"></cell>
-		  </tr>
-		  <tr>
-		    <cell name="4" :mark="cells[4]"></cell>
-		    <cell name="5" :mark="cells[5]"></cell>
-		    <cell name="6" :mark="cells[6]"></cell>
-		  </tr>
-		  <tr>
-		    <cell name="7" :mark="cells[7]"></cell>
-		    <cell name="8" :mark="cells[8]"></cell>
-		    <cell name="9" :mark="cells[9]"></cell>
-		  </tr>
+			<tr v-for="n in boardSize" :key="n + '_column'">
+		    <cell v-for="k in boardSize" :key="k + '_cell'" :name="getIndex(n, k)" :mark="cells[getIndex(n, k)]"></cell>
+			</tr>
 		</table>
 	</div>
 </template>
@@ -28,18 +16,17 @@ import Cell from './Cell.vue'
 
 export default {
 	components: { Cell },
-  props: ['moves', 'cells', 'activePlayer', 'winner', 'gameStatus', 'hardFreeze', 'playerO', 'playerX'],
+  props: ['boardSize', 'winCount', 'moves', 'cells', 'activePlayer', 'winner', 'gameStatus', 'hardFreeze', 'playerO', 'playerX'],
   data () {
     return {
-			winConditions: [
-				[1, 2, 3], [4, 5, 6], [7, 8, 9], // rows
-				[1, 4, 7], [2, 5, 8],	[3, 6, 9], // columns
-				[1, 5, 9], [3, 5, 7]             // diagonals
-			],
     }
   },
 
   computed: {
+		isGomoku() {
+			return this.boardSize === 15;
+		},
+
 		isMyTurn () {
 			if (this.activePlayer === 'X') {
 				return this.playerX === this.$root.identity;
@@ -84,18 +71,34 @@ export default {
   },
 
   methods: {
-		checkForWin () {
-			for (let i = 0; i < this.winConditions.length; i++) {
-				// gets a single condition wc from the whole array
-				let wc = this.winConditions[i]
-				let cells = this.cells
-
-				// compares 3 cell values based on the cells in the condition
-				if (this.areEqual(cells[wc[0]], cells[wc[1]], cells[wc[2]])) {
-					return true
+		getIndex(n, k) {
+			return (n - 1) * this.boardSize +  k;
+		},
+		checkForWin (checkedFunction) {
+			let markCount = 0;
+			for (let i = 1; i < this.cells.length; i++) {
+				const cell = this.cells[i];
+				let tempIndex = i;
+				if (this.activePlayer === cell) {
+					markCount += 1;
+					debugger;
+					for (let i = 0; i < this.winCount - 1; i++) {
+						const nextIndex = checkedFunction(tempIndex);
+						if (this.cells[nextIndex] === this.activePlayer) {
+							markCount += 1;
+							tempIndex = nextIndex;
+						} else {
+							markCount = 0;
+							break;
+						}
+					}
+					if (markCount === this.winCount) {
+						return true;
+					}
+				} else {
+					markCount = 0;
 				}
 			}
-
 			return false
 		},
 
@@ -105,22 +108,43 @@ export default {
 		},
 
 		getGameStatus () {
-			if (this.checkForWin()) {
+			if (this.checkForWin(this.getNextHorizontalCellIndex) ||
+			this.checkForWin(this.getNextVerticalCellIndex) ||
+			this.checkForWin(this.getNextRightDiagonalCellIndex) || 
+			this.checkForWin(this.getNextLeftDiagonalCellIndex)) {
 				return 'win'
-			} else if (this.moves === 8) {
+			} else if (this.moves === this.boardSize * this.boardSize - 1) {
 				return 'draw'
 			}
 			return 'turn'
 		},
 
-		areEqual () {
-		  var len = arguments.length;
-
-		  for (var i = 1; i < len; i++){
-		    if (arguments[i] === '' || arguments[i] !== arguments[i-1])
-		      return false;
-		   }
-		   return true;
+		getNextHorizontalCellIndex(index) {
+			if (index % this.boardSize === 0) {
+				return null;
+			} else {
+				return index + 1;
+			}
+		},
+		getNextVerticalCellIndex(index) {
+			const nextIndex = index + this.boardSize;
+			return nextIndex > this.cells.length - 1 ? null : nextIndex;
+		},
+		getNextRightDiagonalCellIndex(index) {
+			const nextIndex = index + this.boardSize;
+			if ((nextIndex > this.cells.length - 1) || (nextIndex % this.boardSize === 0)) {
+				return null;
+			} else {
+				return nextIndex + 1;
+			}
+		},
+		getNextLeftDiagonalCellIndex(index) {
+			const nextIndex = index + this.boardSize;
+			if ((nextIndex > this.cells.length - 1) || (nextIndex - 1 % this.boardSize === 0)) {
+				return null;
+			} else {
+				return nextIndex - 1;
+			}
 		}
   },
 
@@ -151,10 +175,15 @@ export default {
 </script>
 
 <style>
+.grid-wrapper {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
 .grid {
 	background-color: #34495e;
 	color: #fff;
-  width: 100%;
+  width: auto;
   border-collapse: collapse;
 }
 
@@ -166,6 +195,7 @@ export default {
   color: #fff;	
   font-size: 1.4em;
   font-weight: bold;
+	width: 300px;
 }
 
 .statusTurn {
@@ -178,6 +208,20 @@ export default {
 
 .statusWait {
 	background-color: #f1c40f;
+}
+.cell {
+  width: 125px;
+  height: 125px;
+  border: 6px solid #2c3e50;
+  font-size: 100px;
+  font-family: 'Gochi Hand', sans-serif;
+  border-top-color: transparent;
+}
+.gomoku .cell {
+  width: 30px;
+  height: 30px;
+  border: 2px solid #2c3e50;
+  font-size: 20px;
 }
 
 .statusDraw {

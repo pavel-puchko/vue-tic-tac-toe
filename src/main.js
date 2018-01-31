@@ -32,8 +32,8 @@ new Vue({
   router,
   el: "#app",
   data: {
-    identity: localStorage.getItem('tic-tac-toe-id')
-    // identity: new Date().getTime()
+    // identity: localStorage.getItem('tic-tac-toe-id')
+    identity: new Date().getTime()
   },
   render: h => h(App)
 });

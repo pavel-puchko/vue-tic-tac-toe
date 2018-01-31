@@ -2,7 +2,8 @@
   <div class="menu-wrapper">
     <h1>Tic Tac Toe</h1>
     <div class="main-menu">
-      <button @click="startGame" class="button start-game">Create Classic Board</button>
+      <button @click="startGame(3, 3)" class="button start-game">Create Classic Board</button>
+      <button @click="startGame(15, 5)" class="button start-game">Create Gomoku Board</button>
       <button @click="joinGame" class="button join-game" disabled>Join Board</button>
       <button v-if="roomId" @click="backGame" class="button back-game">Back To Board</button>
     </div>
@@ -11,6 +12,8 @@
 
 <script>
 import { db } from "./../firebase";
+import { getEmptyCells } from "./../helpers";
+
 
 export default {
   data() {
@@ -20,29 +23,21 @@ export default {
   },
 
   methods: {
-    startGame() {
+    startGame(size, winCount) {
       this.$firebaseRefs.rooms
         .push({
           playerO: "",
           playerX: this.$root.identity,
           creator: this.$root.identity,
+          boardSize: size,
+          winCount: winCount,
           creatorWins: 0,
           opponentWins: 0,
           moves: 0,
           activePlayer: "X",
           gameStatus: "turn",
           winner: "",
-          cells: {
-            1: "",
-            2: "",
-            3: "",
-            4: "",
-            5: "",
-            6: "",
-            7: "",
-            8: "",
-            9: ""
-          }
+          cells: getEmptyCells(size)
         })
         .then(res => {
           this.$router.push({ name: "game", params: { gameId: res.key } });

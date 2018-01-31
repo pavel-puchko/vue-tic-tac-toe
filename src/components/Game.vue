@@ -10,9 +10,11 @@
     </div>
     <div id="game">
       <div id="details">
-        <h1>Tic Tac Toe</h1>
+        <h1>{{gameType}}</h1>
       </div>
       <grid 
+        :board-size="room.boardSize"
+        :win-count="room.winCount"
         :moves="room.moves"
         :cells="room.cells"
         :active-player="room.activePlayer"
@@ -32,7 +34,10 @@
 
 <script>
 import Grid from './Grid.vue'
+
 import { db } from './../firebase';
+import { getEmptyCells } from "./../helpers";
+
 
 export default {
   components: { Grid },
@@ -44,6 +49,9 @@ export default {
   },
 
   computed: {
+    gameType () {
+      return this.room.boardSize === 15 ? 'Gomoku' : 'Classik';
+    },
 		myWins () {
 			if (this.room.creator === this.$root.identity) {
 				return this.room.creatorWins;
@@ -91,11 +99,7 @@ export default {
         playerX: this.$root.identity,
         playerO: opponentIdentity,
         hardFreeze: false,
-        cells: {
-          1: '', 2: '', 3: '',
-          4: '', 5: '', 6: '',
-          7: '', 8: '', 9: ''
-        }
+        cells: getEmptyCells(this.room.boardSize),
       });
     }
   },
@@ -146,8 +150,8 @@ export default {
 
 <style>
 #game {
+  padding: 0 36px;
   margin: 0 auto;
-  max-width: 270px;
   color: #34495e;
 }
 
@@ -162,7 +166,7 @@ export default {
   font-weight: bold;
   margin: 0px;
   padding: 15px;
-  width: 100%;
+  width: 300px;
 }
 
 .restart:hover {
