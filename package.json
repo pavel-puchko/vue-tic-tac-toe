@@ -1,0 +1,31 @@
+{
+  "name": "tic-tac-toe-vue",
+  "description": "Vue - Freibase  Tic Tac Toe Online Game",
+  "version": "1.0.0",
+  "author": "Pavel Puchko",
+  "private": false,
+  "scripts": {
+    "start": "node server.js",
+    "dev": "cross-env NODE_ENV=development webpack-dev-server --open --hot",
+    "build": "cross-env NODE_ENV=production webpack --progress --hide-modules",
+    "postInstall": "npm run build"
+  },
+  "dependencies": {
+    "firebase": "^4.9.0",
+    "vue": "^2.5.13",
+    "vue-router": "^3.0.1",
+    "vuefire": "^1.4.5"
+  },
+  "devDependencies": {
+    "babel-core": "^6.0.0",
+    "babel-loader": "^7.1.2",
+    "babel-preset-es2015": "^6.0.0",
+    "css-loader": "^0.28.9",
+    "cross-env": "^5.1.3",
+    "file-loader": "^1.1.6",
+    "vue-loader": "^13.7.0",
+    "vue-template-compiler": "^2.1.0",
+    "webpack": "^3.10.0",
+    "webpack-dev-server": "^2.2.0"
+  }
+}
