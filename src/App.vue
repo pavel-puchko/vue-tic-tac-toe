@@ -36,5 +36,6 @@ export default {
     color: azure;
     text-transform: uppercase;
     font-size: 3em;
+    margin: 20px 0;
   }
 </style>

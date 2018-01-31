@@ -218,8 +218,8 @@ export default {
   border-top-color: transparent;
 }
 .gomoku .cell {
-  width: 30px;
-  height: 30px;
+  width: 25px;
+  height: 25px;
   border: 2px solid #2c3e50;
   font-size: 20px;
 }
