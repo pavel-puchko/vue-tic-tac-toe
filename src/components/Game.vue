@@ -1,5 +1,5 @@
 <template>
-  <div v-if="room && room['.key']">
+  <div v-if="room && room['.key'] === lastVisitedRoomId">
     <div class="scoreBoard">
       <h2>Room ID: {{room['.key']}}</h2>
       <router-link to="/">Menu</router-link>
@@ -28,7 +28,7 @@ export default {
   components: { Grid },
   props: ['gameId'],
   computed: {
-    ...mapState(['room', 'userIdentity']),
+    ...mapState(['room', 'userIdentity', 'lastVisitedRoomId']),
 
     roomRef() {
       return db.ref(`rooms/${this.gameId}`)

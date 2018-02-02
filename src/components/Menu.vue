@@ -21,6 +21,7 @@ export default {
   },
   methods: {
     startGame(size, winCount) {
+      this.$store.dispatch('deleteRoomRef');
       const id = uuid.v4();
       db.ref(`rooms/${id}`)
         .set(getNewRoomDefaultConfig(this.userIdentity, size, winCount))

@@ -28,6 +28,9 @@ export default new Vuex.Store({
     [types.SET_ROOM_ID] (state, { roomId }) {
       state.lastVisitedRoomId = roomId;
     },
+    [types.LEFT_CURRENT_GAME_ROOM] (state) {
+      state.room = null;
+    },
     ...firebaseMutations
   },
   actions: {
@@ -35,6 +38,12 @@ export default new Vuex.Store({
       bindFirebaseRef('room', roomRef, {
         readyCallback,
       })
+    }),
+    deleteRoomRef: firebaseAction(({ state, commit, unbindFirebaseRef }) => {
+      if (state.room) {
+        unbindFirebaseRef('room');
+        commit(types.LEFT_CURRENT_GAME_ROOM);
+      }
     }),
     setLastVisitedRoomId({ commit }, roomId) {
       localStorage.setItem('tic-tac-toe-room-id', roomId);
