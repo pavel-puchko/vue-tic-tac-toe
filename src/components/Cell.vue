@@ -3,19 +3,17 @@
 </template>
 
 <script>
+	import { mapState } from 'vuex'
+
 	export default {
 		props: ['name', 'mark'],
-		data () {
-			return {
-			}	
-		},
-
 		computed: {
-			frozen () {
-  			return !!this.mark || this.$parent.hardFreeze || !this.$parent.isMyTurn || !this.$parent.playerO;
-			}
-		},
+			...mapState(['room']),
 
+			frozen () {
+  			return !!this.mark || this.room.hardFreeze || !this.$parent.isMyTurn || !this.room.playerO;
+			},
+		},
 		methods: {
 			strike () {
 				if (!this.frozen) {

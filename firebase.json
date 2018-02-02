@@ -1,6 +1,11 @@
 {
   "hosting": {
     "public": "./dist",
+    "redirects": [ {
+      "source" : "/game/build.js",
+      "destination" : "/build.js",
+      "type" : 301
+    }],
     "rewrites": [
       {
         "source": "**",

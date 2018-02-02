@@ -4,63 +4,35 @@
     <div class="main-menu">
       <button @click="startGame(3, 3)" class="button start-game">Create Classic Board</button>
       <button @click="startGame(15, 5)" class="button start-game">Create Gomoku Board</button>
-      <button @click="joinGame" class="button join-game" disabled>Join Board</button>
-      <button v-if="roomId" @click="backGame" class="button back-game">Back To Board</button>
+      <button v-if="lastVisitedRoomId" @click="backGame" class="button back-game">Back To Board</button>
     </div>
   </div>
 </template>
 
 <script>
-import { db } from "./../firebase";
-import { getEmptyCells } from "./../helpers";
-
+import { mapState } from 'vuex'
+import { uuid } from 'vue-uuid'
+import { db } from "./../firebase"
+import { getNewRoomDefaultConfig } from "./../helpers"
 
 export default {
-  data() {
-    return {
-      roomId: localStorage.getItem("tic-tac-toe-room-id")
-    };
+  computed: {
+    ...mapState(['userIdentity', 'lastVisitedRoomId'])
   },
-
   methods: {
     startGame(size, winCount) {
-      this.$firebaseRefs.rooms
-        .push({
-          playerO: "",
-          playerX: this.$root.identity,
-          creator: this.$root.identity,
-          boardSize: size,
-          winCount: winCount,
-          creatorWins: 0,
-          opponentWins: 0,
-          moves: 0,
-          activePlayer: "X",
-          gameStatus: "turn",
-          winner: "",
-          cells: getEmptyCells(size)
-        })
+      const id = uuid.v4();
+      db.ref(`rooms/${id}`)
+        .set(getNewRoomDefaultConfig(this.userIdentity, size, winCount))
         .then(res => {
-          this.$router.push({ name: "game", params: { gameId: res.key } });
+          this.$router.push({ name: "game", params: { gameId: id } });
         });
-    },
-    joinGame(room) {
-      return;
     },
 
     backGame() {
       this.$router.push({ name: "game", params: { gameId: this.roomId } });
     }
   },
-
-  firebase: {
-    rooms: {
-      source: db.ref("rooms"),
-      // Optional, allows you to handle any errors.
-      cancelCallback(err) {
-        console.error(err);
-      }
-    }
-  }
 };
 </script>
 

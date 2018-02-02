@@ -5,13 +5,13 @@
 </template>
 
 <script>
+import Game from './Game.vue';
+import Menu from './Menu.vue';
+
 
 export default {
   name: 'app',
-  data () {
-    return {
-    }
-  },
+  components: { Menu, Game }
 }
 </script>
 
@@ -20,10 +20,9 @@ export default {
     height: 100%;
   }
   body {
-    background-image: url("https://wallup.net/wp-content/uploads/2016/01/52654-technology-anime-Joystick-simple_background-simple-video_games-PlayStation-digital_art-controllers-broken.jpg");
-    background-size: hover;
+    background: rgb(10,18,31) url("https://wallup.net/wp-content/uploads/2016/01/52654-technology-anime-Joystick-simple_background-simple-video_games-PlayStation-digital_art-controllers-broken.jpg");
+    background-size: cover;
     background-repeat: no-repeat;
-    background-size: 100% 100%;
     width: 100%;
     color: #fff;
     font-family: 'Dosis', Helvetica, sans-serif;

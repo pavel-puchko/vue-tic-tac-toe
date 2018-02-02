@@ -1,16 +1,13 @@
 import Vue from 'vue'
-import VueRouter from 'vue-router'
-import VueFire from 'vuefire'
+import { sync} from 'vuex-router-sync'
 
-import App from './App.vue'
 import './firebase';
+import store from './store'
+import { router } from './router'
 
-import Game from './components/Game.vue'
-import Menu from './components/Menu.vue'
+import App from './components/App.vue'
 
-
-Vue.use(VueRouter);
-Vue.use(VueFire);
+import { SET_USER_IDENTITY, SET_ROOM_ID }  from './store/mutation-types'
 
 window.Event = new Vue();
 
@@ -18,22 +15,19 @@ if (!localStorage.getItem('tic-tac-toe-id')) {
   localStorage.setItem('tic-tac-toe-id', new Date().getTime() + '-' + Math.random());
 }
 
-const routes = [
-  { name: 'game', path: '/game/:gameId', component: Game, props: true },
-  { name: 'menu', path: '/', component: Menu },
-  { path: '*', redirect: '/' }
-]
-
-const router = new VueRouter({
-  routes // short for `routes: routes`
-})
+sync(store, router);
 
 new Vue({
   router,
+  store,
   el: "#app",
-  data: {
-    identity: localStorage.getItem('tic-tac-toe-id')
-    // identity: new Date().getTime()
-  },
-  render: h => h(App)
+  render: h => h(App),
+  created() {
+    store.commit(SET_USER_IDENTITY, {
+      identity: localStorage.getItem('tic-tac-toe-id')
+    })
+    store.commit(SET_ROOM_ID, {
+      roomId: localStorage.getItem('tic-tac-toe-room-id')
+    })
+  }
 });

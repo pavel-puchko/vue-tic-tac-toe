@@ -1,10 +1,6 @@
 <template>
-  <div v-if="room['.key']">
+  <div v-if="room && room['.key']">
     <div class="scoreBoard">
-      <section>
-        <span>My wins: {{ myWins }}</span>
-        <span>Opponent wins: {{ opponentWins }}</span>
-      </section>
       <h2>Room ID: {{room['.key']}}</h2>
       <router-link to="/">Menu</router-link>
     </div>
@@ -12,19 +8,8 @@
       <div id="details">
         <h1>{{gameType}}</h1>
       </div>
-      <grid 
-        :board-size="room.boardSize"
-        :win-count="room.winCount"
-        :moves="room.moves"
-        :cells="room.cells"
-        :active-player="room.activePlayer"
-        :winner="room.winner"
-        :game-status="room.gameStatus"
-        :hard-freeze="room.hardFreeze"
-        :player-o="room.playerO"
-        :player-x="room.playerX"
-        ></grid>
-      <button class="restart" @click="restart" v-if="(this.$root.identity === room.playerO || this.$root.identity === room.playerX ) && (room.gameStatus === 'win' || room.gameStatus === 'draw')">Restart</button>
+      <grid></grid>
+      <button class="restart" @click="restart" v-if="(userIdentity === room.playerO || userIdentity === room.playerX ) && (room.gameStatus === 'win' || room.gameStatus === 'draw')">Restart</button>
     </div>
   </div>
   <div v-else>
@@ -33,116 +18,62 @@
 </template>
 
 <script>
+import { mapState } from 'vuex'
 import Grid from './Grid.vue'
-
 import { db } from './../firebase';
-import { getEmptyCells } from "./../helpers";
-
+import { getRestartGameConfig } from './../helpers';
+import { SET_CELL_VALUE } from '../store/mutation-types'
 
 export default {
   components: { Grid },
   props: ['gameId'],
-  data () {
-    return {
-      room: {},
-    }
-  },
-
   computed: {
+    ...mapState(['room', 'userIdentity']),
+
+    roomRef() {
+      return db.ref(`rooms/${this.gameId}`)
+    },
+
     gameType () {
-      return this.room.boardSize === 15 ? 'Gomoku' : 'Classik';
+      return this.room.boardSize === 15 ? 'Gomoku (5 to win)' : 'Classik (3 to win)';
     },
-		myWins () {
-			if (this.room.creator === this.$root.identity) {
-				return this.room.creatorWins;
-			} else {
-				return this.room.opponentWins;
-			}
-    },
-
-    opponentWins () {
-			if (this.room.creator === this.$root.identity) {
-				return this.room.opponentWins;
-			} else {
-				return this.room.creatorWins;
-			}
-		},
   },
-
   methods: {
-
     updateRoom (newData) {
-      this.$firebaseRefs.room.update(newData);
+      this.roomRef.update(newData);
     },
 
-    creatorWin() {
-      this.updateRoom({
-        creatorWins: this.room.creatorWins + 1
-      });
-    },
-
-    opponentWin() {
-      this.updateRoom({
-        opponentWins: this.room.opponentWins + 1
-      });
-    },
-    
     restart () {
       const opponentIdentity = this.room.playerX === this.$root.identity ? 
         this.room.playerO :
         this.room.playerX;
-      this.$firebaseRefs.room.update({
-        gameStatus: 'turn',
-        activePlayer: 'X',
-        moves: 0,
-        winner: '',
-        playerX: this.$root.identity,
-        playerO: opponentIdentity,
-        hardFreeze: false,
-        cells: getEmptyCells(this.room.boardSize),
-      });
+      this.roomRef.update(getRestartGameConfig(this.identity, this.room));
     }
   },
-
-  firebase: function () {
-    return {
-      room: {
-        source: db.ref(`rooms/${this.gameId}`),
-        asObject: true,
-        readyCallback(data) {
+  created () {
+    this.$store.dispatch('setRoomRef', {
+       roomRef: this.roomRef,
+       readyCallback: (data) => {
           const val = data.val();
-          if (!val || (val.playerX && val.playerO && val.playerO !== this.$root.identity && val.playerX !== this.$root.identity)) {
+          if (!val ||
+            (val.playerX &&
+            val.playerO &&
+            val.playerO !== this.userIdentity &&
+            val.playerX !== this.userIdentity
+            )) {
             return this.$router.push({ name: "menu" });
           }
-          localStorage.setItem('tic-tac-toe-room-id', this.gameId);
-          if (!val.playerO && val.playerX !== this.$root.identity) {
+          this.$store.dispatch('setLastVisitedRoomId', data.key);
+          if (!val.playerO && val.playerX !== this.userIdentity) {
             this.updateRoom({
-              playerO: this.$root.identity
+              playerO: this.userIdentity
             })
           }
         },
-        cancelCallback(err) {
-          console.error(err);
-        }
-      }
-    }
-  },
-
-  created () {
-    Event.$on('win', winner => {
-      if (!winner) {
-        return;
-      }
-      const winnerPlayer = winner === 'X' ? this.room.playerX : this.room.playerO;
-      if (winnerPlayer === this.room.creator) {
-        this.creatorWin();
-      } else {
-        this.opponentWin();
-      }
     })
 
-    Event.$on('update', board => {
-      this.updateRoom(board);
+    Event.$on('updateRoom', updatedRoom => {
+      this.updateRoom(updatedRoom);
     })
   }
 }
@@ -177,12 +108,10 @@ export default {
 .scoreBoard {
   display: flex;
   flex-direction: row;
-  justify-content: space-around;
+  justify-content: space-between;
   align-items: center;
-  width: 100%;
-  height: 15px;
   box-shadow: 10px solid #fff;
-  padding: 20px 0;
+  padding: 20px 72px;
   overflow-x: none;
 }
 

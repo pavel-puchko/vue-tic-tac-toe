@@ -8,3 +8,35 @@ export const getEmptyCells = (size) => {
   }
   return cells;
 }
+export const getRestartGameConfig = (identity, room) => {
+  {
+    const opponentIdentity = room.playerX === identity ? 
+      room.playerO :
+      room.playerX;
+
+    return {
+      gameStatus: 'turn',
+      activePlayer: 'X',
+      moves: 0,
+      winner: '',
+      playerX: identity,
+      playerO: opponentIdentity,
+      hardFreeze: false,
+      cells: getEmptyCells(room.boardSize),
+    }
+  }
+}
+export const getNewRoomDefaultConfig = (identity, size, winCount) => {
+  return {
+      playerO: '',
+      playerX: identity,
+      creator: identity,
+      boardSize: size,
+      winCount: winCount,
+      moves: 0,
+      activePlayer: "X",
+      gameStatus: "turn",
+      winner: "",
+      cells: getEmptyCells(size)
+  }
+}
