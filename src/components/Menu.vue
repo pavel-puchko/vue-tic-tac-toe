@@ -31,7 +31,7 @@ export default {
     },
 
     backGame() {
-      this.$router.push({ name: "game", params: { gameId: this.roomId } });
+      this.$router.push({ name: "game", params: { gameId: this.lastVisitedRoomId } });
     }
   },
 };

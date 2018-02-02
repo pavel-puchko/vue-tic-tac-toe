@@ -35,7 +35,7 @@ export default {
     },
 
     gameType () {
-      return this.room.boardSize === 15 ? 'Gomoku (5 to win)' : 'Classik (3 to win)';
+      return this.room.boardSize === 15 ? 'Gomoku (5 to win)' : 'Classiс (3 to win)';
     },
   },
   methods: {
