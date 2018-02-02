@@ -1,7 +1,36 @@
 <template>
   <div v-if="room && room['.key'] === lastVisitedRoomId">
     <div class="scoreBoard">
-      <h2>Room ID: {{room['.key']}}</h2>
+      <h2>
+        Send invite via: 
+        <social-sharing :url="roomUrl"
+                      title="Join tic-tac-toe battle"
+                      description="I'm calling you to fight in tic-tac-toe. Let the battle begin."
+                      quote="I'm calling you to fight in tic-tac-toe. Let the battle begin."
+                      inline-template>
+          <div>
+              <network network="vk">
+                <i class="fa fa-vk"></i> VKontakte
+              </network>
+              <network network="facebook">
+                <i class="fa fa-facebook"></i> Facebook
+              </network>
+              <network network="email">
+                <i class="fa fa-envelope"></i> Email
+              </network>
+              <network network="skype">
+                <i class="fa fa-skype"></i> Skype
+              </network>
+              <network network="telegram">
+                <i class="fa fa-telegram"></i> Telegram
+              </network>
+              <network network="whatsapp">
+                <i class="fa fa-whatsapp"></i> Whatsapp
+              </network>
+          </div>
+        </social-sharing>
+      </h2>
+
       <router-link to="/">Menu</router-link>
     </div>
     <div id="game">
@@ -27,6 +56,11 @@ import { SET_CELL_VALUE } from '../store/mutation-types'
 export default {
   components: { Grid },
   props: ['gameId'],
+  data: function() {
+    return {
+      roomUrl: location.href,
+    }
+  },
   computed: {
     ...mapState(['room', 'userIdentity', 'lastVisitedRoomId']),
 
@@ -114,6 +148,15 @@ export default {
 
 .scoreBoard h2 {
   margin: 0px;
+  display: flex;
+}
+
+.scoreBoard h2 > div > span {
+  text-decoration: underline;
+  cursor: pointer;
+}
+.scoreBoard h2 > div > span {
+  margin-left: 16px;
 }
 
 .scoreBoard a {

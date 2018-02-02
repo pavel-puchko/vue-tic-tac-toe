@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import SocialSharing from 'vue-social-sharing'; 
 import { sync} from 'vuex-router-sync'
 
 import './firebase';
@@ -9,6 +10,7 @@ import App from './components/App.vue'
 
 import { SET_USER_IDENTITY, SET_ROOM_ID }  from './store/mutation-types'
 
+Vue.use(SocialSharing);
 window.Event = new Vue();
 
 if (!localStorage.getItem('tic-tac-toe-id')) {
