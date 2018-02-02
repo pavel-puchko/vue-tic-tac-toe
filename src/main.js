@@ -24,10 +24,10 @@ new Vue({
   render: h => h(App),
   created() {
     store.commit(SET_USER_IDENTITY, {
-      identity: localStorage.getItem('tic-tac-toe-id')
-    })
+      identity: new Date().getTime() + '-' + Math.random() || localStorage.getItem('tic-tac-toe-id')
+    });
     store.commit(SET_ROOM_ID, {
       roomId: localStorage.getItem('tic-tac-toe-room-id')
-    })
+    });
   }
 });

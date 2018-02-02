@@ -6,10 +6,6 @@ import Menu from './components/Menu.vue'
 
 Vue.use(VueRouter);
 
-const testcomp = {
-  template: `<div>hello</div>`,
-}
-
 const routes = [
   { name: 'game', path: '/game/:gameId', component: Game, props: true },
   { name: 'menu', path: '/', component: Menu },

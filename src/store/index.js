@@ -23,6 +23,7 @@ export default new Vuex.Store({
     },
     [types.SET_CELL_VALUE] (state, { cellNumber, value }) {
       state.room.cells[cellNumber] = value;
+      state.room.lastPlayedCellIndex = cellNumber;
     },
     [types.SET_ROOM_ID] (state, { roomId }) {
       state.lastVisitedRoomId = roomId;

@@ -44,10 +44,7 @@ export default {
     },
 
     restart () {
-      const opponentIdentity = this.room.playerX === this.$root.identity ? 
-        this.room.playerO :
-        this.room.playerX;
-      this.roomRef.update(getRestartGameConfig(this.identity, this.room));
+      this.roomRef.update(getRestartGameConfig(this.userIdentity, this.room));
     }
   },
   created () {

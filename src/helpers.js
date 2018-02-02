@@ -19,6 +19,7 @@ export const getRestartGameConfig = (identity, room) => {
       activePlayer: 'X',
       moves: 0,
       winner: '',
+      lastPlayedCellIndex: '',
       playerX: identity,
       playerO: opponentIdentity,
       hardFreeze: false,
@@ -34,9 +35,10 @@ export const getNewRoomDefaultConfig = (identity, size, winCount) => {
       boardSize: size,
       winCount: winCount,
       moves: 0,
-      activePlayer: "X",
-      gameStatus: "turn",
-      winner: "",
+      lastPlayedCellIndex: '',
+      activePlayer: 'X',
+      gameStatus: 'turn',
+      winner: '',
       cells: getEmptyCells(size)
   }
 }

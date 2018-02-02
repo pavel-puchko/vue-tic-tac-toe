@@ -34,7 +34,8 @@ export default {
   h1 {
     color: azure;
     text-transform: uppercase;
-    font-size: 3em;
-    margin: 20px 0;
+    font-size: 2.5em;
+    margin: 10px 0 20px 0;
+    
   }
 </style>

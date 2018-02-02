@@ -1,12 +1,12 @@
 <template>
-	<td class="cell" @click="strike">{{ mark }}</td>
+	<td class="cell" :class="{'frozen' : frozen, 'last-played': room.lastPlayedCellIndex === index}" @click="strike">{{ mark }}</td>
 </template>
 
 <script>
 	import { mapState } from 'vuex'
 
 	export default {
-		props: ['name', 'mark'],
+		props: ['index', 'mark'],
 		computed: {
 			...mapState(['room']),
 
@@ -17,7 +17,7 @@
 		methods: {
 			strike () {
 				if (!this.frozen) {
-					Event.$emit('strike', this.name)
+					Event.$emit('strike', this.index)
 				}
 			}
 		},
@@ -26,8 +26,13 @@
 
 <style>
 
-.cell:hover {
+.cell:not(.frozen):hover {
+	cursor: cell;
 	background-color: #7f8c8d;
+}
+
+.cell.last-played {
+	background-color: #9b59b6;
 }
 
 .cell::after {

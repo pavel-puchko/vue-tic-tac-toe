@@ -5,7 +5,7 @@
 		</div>
 		<table class="grid">
 			<tr v-for="n in room.boardSize" :key="n + '_column'">
-		    <cell v-for="k in room.boardSize" :key="getCellIndex(n, k) + '_cell'" :name="getCellIndex(n, k)" :mark="room.cells[getCellIndex(n, k)]"></cell>
+		    <cell v-for="k in room.boardSize" :key="getCellIndex(n, k) + '_cell'" :index="getCellIndex(n, k)" :mark="room.cells[getCellIndex(n, k)]"></cell>
 			</tr>
 		</table>
 	</div>
@@ -43,18 +43,22 @@ export default {
 
   		return 'O'
 		},
+
+		isImWinner() {
+			return this.room.winner === this.userIdentity;
+		},
 		
 		gameStatusColor() {
 			if (!this.room.playerO) {
 				return 'statusWait'
 			}
 			if (this.room.gameStatus === 'win') {
-				return 'statusWin'
+				return this.isImWinner ? 'statusWin' : 'statusLose'
   		} else if (this.room.gameStatus === 'draw') {
   		 	return 'statusDraw'
 			} 
 			
-			return 'statusTurn'
+			return this.isMyTurn ? 'statusMyTurn' : 'statusOpponentTurn'
 		},
 
 		gameStatusMessage() {
@@ -62,7 +66,7 @@ export default {
 				return 'Waiting for opponent'
 			}
   		if (this.room.gameStatus === 'win') {
-  			return `${this.winner} Wins !`
+  			return this.isImWinner ? 'You win !': 'You lose :('
 			} 
 			if (this.room.gameStatus === 'draw') {
   			return 'Draw !'
@@ -76,6 +80,7 @@ export default {
 		},
 	
 		checkForWin (checkedFunction) {
+			debugger;
 			const cells = this.room.cells;
 			const winCount = this.room.winCount;
 			const activePlayer = this.room.activePlayer;
@@ -107,10 +112,12 @@ export default {
 		},
 
 		getGameStatus () {
-			if (this.checkForWin(this.getNextHorizontalCellIndex) ||
-			this.checkForWin(this.getNextVerticalCellIndex) ||
-			this.checkForWin(this.getNextRightDiagonalCellIndex) || 
-			this.checkForWin(this.getNextLeftDiagonalCellIndex)) {
+			if (
+				this.checkForWin(this.getNextHorizontalCellIndex) ||
+				this.checkForWin(this.getNextVerticalCellIndex) ||
+				this.checkForWin(this.getNextRightDiagonalCellIndex) || 
+				this.checkForWin(this.getNextLeftDiagonalCellIndex)
+			) {
 				return 'win'
 			} else if (this.room.moves === this.room.boardSize * this.room.boardSize - 1) {
 				return 'draw'
@@ -151,18 +158,20 @@ export default {
   },
   created () {
   	Event.$on('strike', (cellNumber) => {
-			const gameStatus = this.getGameStatus();
     	this.$store.commit(SET_CELL_VALUE, {
 				cellNumber,
 				value: this.room.activePlayer
 			});
 
+			const gameStatus = this.getGameStatus();
+
 			Event.$emit('updateRoom', { 
 				moves: this.room.moves + 1,
-				activePlayer: this.nonActivePlayer,
+				activePlayer: gameStatus !== 'win' ? this.nonActivePlayer : '',
 				cells: this.room.cells,
 				gameStatus: gameStatus,
-				winner: gameStatus === 'win' ? this.room.activePlayer : '',
+				lastPlayedCellIndex: cellNumber,
+				winner: gameStatus === 'win' ? this.userIdentity : '',
 				hardFreeze: gameStatus === 'win'
 			});
   	})
@@ -202,17 +211,23 @@ export default {
   font-family: 'Gochi Hand', sans-serif;
 	
 }
-
-.statusTurn {
-	background-color: #e74c3c;
+.statusMyTurn {
+	background-color:#238e88;
 }
-
+.statusOpponentTurn {
+	background-color:#68707c;
+}
 .statusWin {
 	background-color: #2ecc71;
 }
-
+.statusLose {
+	background-color: #e74c3c;
+}
 .statusWait {
 	background-color: #f1c40f;
+}
+.statusDraw {
+	background-color: #9b59b6;
 }
 .cell {
   width: 125px;
@@ -227,9 +242,5 @@ export default {
   height: 25px;
   border: 2px solid #2c3e50;
   font-size: 20px;
-}
-
-.statusDraw {
-	background-color: #9b59b6;
 }
 </style>
