@@ -32,7 +32,7 @@
 }
 
 .cell.last-played {
-	background-color: #9b59b6;
+	color: #e74c3c;
 }
 
 .cell::after {

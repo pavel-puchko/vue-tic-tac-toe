@@ -5,6 +5,11 @@
       "source" : "/game/build.js",
       "destination" : "/build.js",
       "type" : 301
+    },
+    {
+      "source" : "/game/favicon.png",
+      "destination" : "/favicon.png",
+      "type" : 301
     }],
     "rewrites": [
       {

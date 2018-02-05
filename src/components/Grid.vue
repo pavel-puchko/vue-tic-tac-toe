@@ -7,6 +7,8 @@
 			<tr v-for="n in room.boardSize" :key="n + '_column'">
 		    <cell v-for="k in room.boardSize" :key="getCellIndex(n, k) + '_cell'" :index="getCellIndex(n, k)" :mark="room.cells[getCellIndex(n, k)]"></cell>
 			</tr>
+			<img id="alina1" v-if="room.alinaWin" src="https://pp.userapi.com/c841429/v841429163/46af4/MBB-5-xZ9IE.jpg" />
+			<img id="alina2" v-if="room.alinaWin" src="https://pp.userapi.com/c841030/v841030106/4dbb6/Cn1byOiHDJ4.jpg" />
 		</table>
 	</div>
 </template>
@@ -65,7 +67,13 @@ export default {
 			if (!this.room.playerO) {
 				return 'Waiting for opponent'
 			}
+			if (this.room.alinaWin) {
+
+			}
   		if (this.room.gameStatus === 'win') {
+				if (this.room.alinaWin) {
+  				return this.isImWinner ? 'Alipusik win :)': 'You lose :('
+				}
   			return this.isImWinner ? 'You win !': 'You lose :('
 			} 
 			if (this.room.gameStatus === 'draw') {
@@ -180,12 +188,28 @@ export default {
 </script>
 
 <style>
+#alina1, #alina2 {
+	border-radius: 20px;
+	position: absolute;
+	height: 185px;
+	top: 125px;
+	width: 115px;
+	object-fit: cover;
+	
+}
+#alina1 {
+	left: 0;
+}
+#alina2 {
+	left: 321px;
+}
 .grid-wrapper {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 }
 .grid {
+	position: relative;
 	background-color: #34495e;
 	color: #fff;
   width: auto;

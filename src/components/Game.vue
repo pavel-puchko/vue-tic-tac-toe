@@ -1,36 +1,19 @@
 <template>
   <div v-if="room && room['.key'] === lastVisitedRoomId">
     <div class="scoreBoard">
-      <h2>
+      <h2 v-if="!isRoomFull">
         Send invite via: 
-        <social-sharing :url="roomUrl"
-                      title="Join tic-tac-toe battle"
-                      description="I'm calling you to fight in tic-tac-toe. Let the battle begin."
-                      quote="I'm calling you to fight in tic-tac-toe. Let the battle begin."
-                      inline-template>
+        <social-sharing :url="roomUrl" title="Join tic-tac-toe battle" description="I'm calling you to fight in tic-tac-toe. Let the battle begin." quote="I'm calling you to fight in tic-tac-toe. Let the battle begin." inline-template>
           <div>
-              <network network="vk">
-                <i class="fa fa-vk"></i> VKontakte
-              </network>
-              <network network="facebook">
-                <i class="fa fa-facebook"></i> Facebook
-              </network>
-              <network network="email">
-                <i class="fa fa-envelope"></i> Email
-              </network>
-              <network network="skype">
-                <i class="fa fa-skype"></i> Skype
-              </network>
-              <network network="telegram">
-                <i class="fa fa-telegram"></i> Telegram
-              </network>
-              <network network="whatsapp">
-                <i class="fa fa-whatsapp"></i> Whatsapp
-              </network>
+            <network network="vk">VKontakte</network>
+            <network network="facebook">Facebook</network>
+            <network network="skype">Skype</network>
+            <network network="telegram">Telegram</network>
+            <network network="whatsapp">Whatsapp</network>
           </div>
         </social-sharing>
       </h2>
-
+      <h2 v-else></h2>
       <router-link to="/">Menu</router-link>
     </div>
     <div id="game">
@@ -40,6 +23,7 @@
       <grid></grid>
       <button class="restart" @click="restart" v-if="(userIdentity === room.playerO || userIdentity === room.playerX ) && (room.gameStatus === 'win' || room.gameStatus === 'draw')">Restart</button>
     </div>
+    <div v-if="isGomoku" id="alinchik" @click="restartWithAlinaWin()"></div>
   </div>
   <div v-else>
     <h1>Loading...</h1>
@@ -50,7 +34,7 @@
 import { mapState } from 'vuex'
 import Grid from './Grid.vue'
 import { db } from './../firebase';
-import { getRestartGameConfig } from './../helpers';
+import { getRestartGameConfig, getAlinaWinCells } from './../helpers';
 import { SET_CELL_VALUE } from '../store/mutation-types'
 
 export default {
@@ -68,9 +52,17 @@ export default {
       return db.ref(`rooms/${this.gameId}`)
     },
 
+    isRoomFull() {
+      return this.room.playerO && this.room.playerX;
+    },
+
     gameType () {
       return this.room.boardSize === 15 ? 'Gomoku (5 to win)' : 'Classiс (3 to win)';
     },
+
+    isGomoku() {
+      return this.room.boardSize === 15;
+    }
   },
   methods: {
     updateRoom (newData) {
@@ -79,6 +71,10 @@ export default {
 
     restart () {
       this.roomRef.update(getRestartGameConfig(this.userIdentity, this.room));
+    },
+
+    restartWithAlinaWin() {
+      this.roomRef.update({ ...getRestartGameConfig(this.userIdentity, this.room), ...{ cells: getAlinaWinCells(), gameStatus: 'win', winner: this.userIdentity, alinaWin: true}});
     }
   },
   created () {
@@ -111,6 +107,13 @@ export default {
 </script>
 
 <style>
+#alinchik {
+  width: 1px;
+  height: 1px;
+  position: fixed;
+  left: 0;
+  bottom: 0;
+}
 #game {
   padding: 0 36px;
   margin: 0 auto;
