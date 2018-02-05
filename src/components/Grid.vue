@@ -106,7 +106,6 @@ export default {
 				const cell = cells[i];
 				let tempIndex = i;
 				if (activePlayer === cell) {
-					debugger;
 					markCount += 1;
 					for (let i = 0; i < winCount - 1; i++) {
 						const nextIndex = checkedFunction(tempIndex);
@@ -218,8 +217,13 @@ export default {
 				...this.checkForWin(this.getNextRightDiagonalCellIndex, playerMark),
 				...this.checkForWin(this.getNextRightToTopDiagonalCellIndex, playerMark),
 				...this.checkForWin(this.getNextLeftToTopDiagonalCellIndex, playerMark),
-				...this.checkForWin(this.getNextLeftDiagonalCellIndex, playerMark)];
-			return playerWinMap.sort((a,b) => b.count - a.count)[0].index;
+				...this.checkForWin(this.getNextLeftDiagonalCellIndex, playerMark)]
+					
+			const sortedWinMap = playerWinMap.sort((a,b) => b.count - a.count);
+			const biggerCount = sortedWinMap[0].count;
+			const onlyMoreDangerousPlayerCells = sortedWinMap.filter(p => p.count === biggerCount);
+
+			return onlyMoreDangerousPlayerCells[Math.floor(Math.random()*onlyMoreDangerousPlayerCells.length)].index;
 		}
   },
   created () {
@@ -243,7 +247,7 @@ export default {
 			if (this.room.vsBot && !this.isMyTurn && gameStatus === 'turn'){
 				setTimeout(() => {
 					Event.$emit('strike', this.getAICellNumber('O'))
-				}, 1000);
+				}, 500);
 			}
   	})
   }
