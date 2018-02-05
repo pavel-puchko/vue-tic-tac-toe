@@ -28,9 +28,9 @@ export const getRestartGameConfig = (identity, room) => {
     }
   }
 }
-export const getNewRoomDefaultConfig = (identity, size, winCount) => {
+export const getNewRoomDefaultConfig = (identity, size, winCount, vsBot = false) => {
   return {
-      playerO: '',
+      playerO: vsBot ? 'bot' : '',
       playerX: identity,
       creator: identity,
       boardSize: size,
@@ -40,7 +40,8 @@ export const getNewRoomDefaultConfig = (identity, size, winCount) => {
       activePlayer: 'X',
       gameStatus: 'turn',
       winner: '',
-      cells: getEmptyCells(size)
+      cells: getEmptyCells(size),
+      vsBot
   }
 }
 export const getAlinaWinCells = (mark = 'X') => {

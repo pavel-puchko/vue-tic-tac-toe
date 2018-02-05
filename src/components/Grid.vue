@@ -74,12 +74,20 @@ export default {
 				if (this.room.alinaWin) {
   				return this.isImWinner ? 'Alipusik win :)': 'You lose :('
 				}
+
   			return this.isImWinner ? 'You win !': 'You lose :('
 			} 
 			if (this.room.gameStatus === 'draw') {
   			return 'Draw !'
-  		}
-			return this.isMyTurn ? `You turn: ` :  `Opponent turn: `
+			}
+			
+			if (this.isMyTurn) {
+				return `You turn: ` 
+			} else if (this.room.vsBot) {
+				return `AI turn: `
+			} else {
+				return `Opponent turn: `
+			}
 		}
   },
   methods: {
@@ -87,17 +95,18 @@ export default {
 			return (n - 1) * this.room.boardSize +  k;
 		},
 	
-		checkForWin (checkedFunction) {
-			debugger;
+		checkForWin (checkedFunction, aPlayer) {
 			const cells = this.room.cells;
 			const winCount = this.room.winCount;
-			const activePlayer = this.room.activePlayer;
+			const activePlayer = aPlayer || this.room.activePlayer;
+			const winMap = [];
 			let markCount = 0;
 
 			for (let i = 1; i < cells.length; i++) {
 				const cell = cells[i];
 				let tempIndex = i;
 				if (activePlayer === cell) {
+					debugger;
 					markCount += 1;
 					for (let i = 0; i < winCount - 1; i++) {
 						const nextIndex = checkedFunction(tempIndex);
@@ -105,6 +114,12 @@ export default {
 							markCount += 1;
 							tempIndex = nextIndex;
 						} else {
+							if (cells[nextIndex] === '') {
+								winMap.push({
+									count: markCount + 1,
+									index: nextIndex,
+								})
+							}
 							markCount = 0;
 							break;
 						}
@@ -116,15 +131,15 @@ export default {
 					markCount = 0;
 				}
 			}
-			return false;
+			return winMap;
 		},
 
 		getGameStatus () {
 			if (
-				this.checkForWin(this.getNextHorizontalCellIndex) ||
-				this.checkForWin(this.getNextVerticalCellIndex) ||
-				this.checkForWin(this.getNextRightDiagonalCellIndex) || 
-				this.checkForWin(this.getNextLeftDiagonalCellIndex)
+				this.checkForWin(this.getNextRightHorizontalCellIndex) === true ||
+				this.checkForWin(this.getNextBottomVerticalCellIndex) === true ||
+				this.checkForWin(this.getNextRightDiagonalCellIndex) === true ||
+				this.checkForWin(this.getNextLeftDiagonalCellIndex) === true
 			) {
 				return 'win'
 			} else if (this.room.moves === this.room.boardSize * this.room.boardSize - 1) {
@@ -133,7 +148,7 @@ export default {
 			return 'turn'
 		},
 
-		getNextHorizontalCellIndex(index) {
+		getNextRightHorizontalCellIndex(index) {
 			if (index % this.room.boardSize === 0) {
 				return null;
 			} else {
@@ -141,14 +156,36 @@ export default {
 			}
 		},
 
-		getNextVerticalCellIndex(index) {
+		getNextLeftHorizontalCellIndex(index) {
+			if ((index - 1) % this.room.boardSize === 0) {
+				return null;
+			} else {
+				return index - 1;
+			}
+		},
+
+		getNextBottomVerticalCellIndex(index) {
 			const nextIndex = index + this.room.boardSize;
 			return nextIndex > this.room.cells.length - 1 ? null : nextIndex;
 		},
 
+		getNextTopVerticalCellIndex(index) {
+			const nextIndex = index - this.room.boardSize;
+			return nextIndex < 1 ? null : nextIndex;
+		},
+
 		getNextRightDiagonalCellIndex(index) {
 			const nextIndex = index + this.room.boardSize;
-			if ((nextIndex > this.room.cells.length - 1) || (nextIndex % this.room.boardSize === 0)) {
+			if ((nextIndex > this.room.cells.length - 1) || ((nextIndex - 1) % this.room.boardSize === 0)) {
+				return null;
+			} else {
+				return nextIndex - 1;
+			}
+		},
+
+		getNextRightToTopDiagonalCellIndex(index) {
+			const nextIndex = index - this.room.boardSize;
+			if ((nextIndex < 1) || (nextIndex  % this.room.boardSize === 0)) {
 				return null;
 			} else {
 				return nextIndex + 1;
@@ -157,11 +194,32 @@ export default {
 
 		getNextLeftDiagonalCellIndex(index) {
 			const nextIndex = index + this.room.boardSize;
-			if ((nextIndex > this.room.cells.length - 1) || (nextIndex - 1 % this.room.boardSize === 0)) {
+			if ((nextIndex > this.room.cells.length - 1) || (nextIndex % this.room.boardSize === 0)) {
+				return null;
+			} else {
+				return nextIndex + 1;
+			}
+		}, 
+		getNextLeftToTopDiagonalCellIndex(index) {
+			const nextIndex = index - this.room.boardSize;
+			if ((nextIndex < 1) || ((nextIndex - 1) % this.room.boardSize === 0)) {
 				return null;
 			} else {
 				return nextIndex - 1;
 			}
+		}, 
+		getAICellNumber(AIMark) {
+			const playerMark = AIMark === 'O' ? 'X' : 'O';
+			const playerWinMap = [
+				...this.checkForWin(this.getNextRightHorizontalCellIndex, playerMark),
+				...this.checkForWin(this.getNextLeftHorizontalCellIndex, playerMark),
+				...this.checkForWin(this.getNextBottomVerticalCellIndex, playerMark),
+				...this.checkForWin(this.getNextTopVerticalCellIndex, playerMark),
+				...this.checkForWin(this.getNextRightDiagonalCellIndex, playerMark),
+				...this.checkForWin(this.getNextRightToTopDiagonalCellIndex, playerMark),
+				...this.checkForWin(this.getNextLeftToTopDiagonalCellIndex, playerMark),
+				...this.checkForWin(this.getNextLeftDiagonalCellIndex, playerMark)];
+			return playerWinMap.sort((a,b) => b.count - a.count)[0].index;
 		}
   },
   created () {
@@ -175,13 +233,18 @@ export default {
 
 			Event.$emit('updateRoom', { 
 				moves: this.room.moves + 1,
-				activePlayer: gameStatus !== 'win' ? this.nonActivePlayer : '',
+				activePlayer: gameStatus === 'turn' ? this.nonActivePlayer : '',
 				cells: this.room.cells,
 				gameStatus: gameStatus,
 				lastPlayedCellIndex: cellNumber,
 				winner: gameStatus === 'win' ? this.userIdentity : '',
-				hardFreeze: gameStatus === 'win'
+				hardFreeze: gameStatus !== 'turn'
 			});
+			if (this.room.vsBot && !this.isMyTurn && gameStatus === 'turn'){
+				setTimeout(() => {
+					Event.$emit('strike', this.getAICellNumber('O'))
+				}, 1000);
+			}
   	})
   }
 }

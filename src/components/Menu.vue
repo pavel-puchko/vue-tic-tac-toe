@@ -4,6 +4,7 @@
     <div class="main-menu">
       <button @click="startGame(3, 3)" class="button start-game">Create Classic Board</button>
       <button @click="startGame(15, 5)" class="button start-game">Create Gomoku Board</button>
+      <button @click="startGame(15, 5, true)" class="button start-game">Play Gomoku vs AI</button>
       <button v-if="lastVisitedRoomId" @click="backGame" class="button back-game">Back To Board</button>
     </div>
   </div>
@@ -20,11 +21,11 @@ export default {
     ...mapState(['userIdentity', 'lastVisitedRoomId'])
   },
   methods: {
-    startGame(size, winCount) {
+    startGame(size, winCount, vsBot) {
       this.$store.dispatch('deleteRoomRef');
       const id = uuid.v4();
       db.ref(`rooms/${id}`)
-        .set(getNewRoomDefaultConfig(this.userIdentity, size, winCount))
+        .set(getNewRoomDefaultConfig(this.userIdentity, size, winCount, vsBot))
         .then(res => {
           this.$router.push({ name: "game", params: { gameId: id } });
         });
