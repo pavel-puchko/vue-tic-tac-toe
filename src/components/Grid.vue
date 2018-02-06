@@ -218,12 +218,31 @@ export default {
 				...this.checkForWin(this.getNextRightToTopDiagonalCellIndex, playerMark),
 				...this.checkForWin(this.getNextLeftToTopDiagonalCellIndex, playerMark),
 				...this.checkForWin(this.getNextLeftDiagonalCellIndex, playerMark)]
-					
-			const sortedWinMap = playerWinMap.sort((a,b) => b.count - a.count);
-			const biggerCount = sortedWinMap[0].count;
-			const onlyMoreDangerousPlayerCells = sortedWinMap.filter(p => p.count === biggerCount);
+			
+			const aiWinMap = [
+				...this.checkForWin(this.getNextRightHorizontalCellIndex, AIMark),
+				...this.checkForWin(this.getNextLeftHorizontalCellIndex, AIMark),
+				...this.checkForWin(this.getNextBottomVerticalCellIndex, AIMark),
+				...this.checkForWin(this.getNextTopVerticalCellIndex, AIMark),
+				...this.checkForWin(this.getNextRightDiagonalCellIndex, AIMark),
+				...this.checkForWin(this.getNextRightToTopDiagonalCellIndex, AIMark),
+				...this.checkForWin(this.getNextLeftToTopDiagonalCellIndex, AIMark),
+				...this.checkForWin(this.getNextLeftDiagonalCellIndex, AIMark)]
 
-			return onlyMoreDangerousPlayerCells[Math.floor(Math.random()*onlyMoreDangerousPlayerCells.length)].index;
+			const sortedPlayerWinMap = playerWinMap.sort((a,b) => b.count - a.count);
+			const sortedAIWinMap = aiWinMap.sort((a,b) => b.count - a.count);
+		
+			const biggerPlayerCount = sortedPlayerWinMap[0].count;
+			const biggerAiCount = sortedAIWinMap.length ? sortedAIWinMap[0].count : 0;
+
+			const onlyMoreDangerousPlayerCells = sortedPlayerWinMap.filter(p => p.count === biggerPlayerCount);
+			const onlyMoreDangerousAiCells = sortedAIWinMap.filter(p => p.count === biggerAiCount);
+
+			if ((biggerPlayerCount > 3 || biggerAiCount === 0) && biggerPlayerCount > biggerAiCount && biggerAiCount !== 5) {
+				return onlyMoreDangerousPlayerCells[Math.floor(Math.random()*onlyMoreDangerousPlayerCells.length)].index;
+			} else{
+				return onlyMoreDangerousAiCells[Math.floor(Math.random()*onlyMoreDangerousAiCells.length)].index;
+			}
 		}
   },
   created () {
@@ -234,6 +253,15 @@ export default {
 			});
 
 			const gameStatus = this.getGameStatus();
+			let winner = '';
+
+			if (gameStatus === 'win') {
+				if (this.room.vsBot) {
+					winner = this.room.activePlayer === 'O' ? 'bot' : this.userIdentity;
+				} else {
+					winner = this.userIdentity;
+				}
+			}
 
 			Event.$emit('updateRoom', { 
 				moves: this.room.moves + 1,
@@ -241,7 +269,7 @@ export default {
 				cells: this.room.cells,
 				gameStatus: gameStatus,
 				lastPlayedCellIndex: cellNumber,
-				winner: gameStatus === 'win' ? this.userIdentity : '',
+				winner,
 				hardFreeze: gameStatus !== 'turn'
 			});
 			if (this.room.vsBot && !this.isMyTurn && gameStatus === 'turn'){
