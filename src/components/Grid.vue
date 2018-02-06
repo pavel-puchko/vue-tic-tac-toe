@@ -95,7 +95,7 @@ export default {
 			return (n - 1) * this.room.boardSize +  k;
 		},
 	
-		checkForWin (checkedFunction, aPlayer) {
+		checkForWin (getNextIndexFunction, aPlayer) {
 			const cells = this.room.cells;
 			const winCount = this.room.winCount;
 			const activePlayer = aPlayer || this.room.activePlayer;
@@ -108,14 +108,23 @@ export default {
 				if (activePlayer === cell) {
 					markCount += 1;
 					for (let i = 0; i < winCount - 1; i++) {
-						const nextIndex = checkedFunction(tempIndex);
+						const nextIndex = getNextIndexFunction(tempIndex);
 						if (cells[nextIndex] === activePlayer) {
 							markCount += 1;
 							tempIndex = nextIndex;
 						} else {
 							if (cells[nextIndex] === '') {
+								const	count = markCount + 1;
+								let nextIndexAfterNextIndex = getNextIndexFunction(nextIndex);
+								let futureCount = 0;
+								while (nextIndexAfterNextIndex && cells[nextIndexAfterNextIndex] === activePlayer) {
+									futureCount += 1;
+									nextIndexAfterNextIndex = getNextIndexFunction(nextIndexAfterNextIndex);
+								}
+								const oneTurnNextMark = cells[getNextIndexFunction(nextIndex)] === activePlayer;
 								winMap.push({
-									count: markCount + 1,
+									count,
+									futureCount: count + futureCount,
 									index: nextIndex,
 								})
 							}
@@ -229,17 +238,17 @@ export default {
 				...this.checkForWin(this.getNextLeftToTopDiagonalCellIndex, AIMark),
 				...this.checkForWin(this.getNextLeftDiagonalCellIndex, AIMark)]
 
-			const sortedPlayerWinMap = playerWinMap.sort((a,b) => b.count - a.count);
-			const sortedAIWinMap = aiWinMap.sort((a,b) => b.count - a.count);
+			const sortedPlayerWinMap = playerWinMap.sort((a,b) => b.futureCount - a.futureCount);
+			const sortedAIWinMap = aiWinMap.sort((a,b) => b.futureCount - a.futureCount);
 		
-			const biggerPlayerCount = sortedPlayerWinMap[0].count;
-			const biggerAiCount = sortedAIWinMap.length ? sortedAIWinMap[0].count : 0;
+			const biggerPlayerCount = sortedPlayerWinMap[0].futureCount;
+			const biggerAiCount = sortedAIWinMap.length ? sortedAIWinMap[0].futureCount : 0;
 
-			const onlyMoreDangerousPlayerCells = sortedPlayerWinMap.filter(p => p.count === biggerPlayerCount);
-			const onlyMoreDangerousAiCells = sortedAIWinMap.filter(p => p.count === biggerAiCount);
+			const onlyMoreDangerousPlayerCells = sortedPlayerWinMap.filter(p => p.futureCount === biggerPlayerCount);
+			const onlyMoreDangerousAiCells = sortedAIWinMap.filter(p => p.futureCount === biggerAiCount);
 
 			if (
-				biggerAiCount !== 5 &&
+				biggerAiCount < 5 &&
 				(biggerPlayerCount > 2 || biggerAiCount === 0) && 
 				(
 					(biggerPlayerCount > biggerAiCount) || 
