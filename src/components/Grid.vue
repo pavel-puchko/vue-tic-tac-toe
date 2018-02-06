@@ -238,7 +238,13 @@ export default {
 			const onlyMoreDangerousPlayerCells = sortedPlayerWinMap.filter(p => p.count === biggerPlayerCount);
 			const onlyMoreDangerousAiCells = sortedAIWinMap.filter(p => p.count === biggerAiCount);
 
-			if ((biggerPlayerCount > 3 || biggerAiCount === 0) && biggerPlayerCount > biggerAiCount && biggerAiCount !== 5) {
+			if (
+				biggerAiCount !== 5 &&
+				(biggerPlayerCount > 2 || biggerAiCount === 0) && 
+				(
+					(biggerPlayerCount > biggerAiCount) || 
+					((biggerAiCount === biggerPlayerCount) && (onlyMoreDangerousPlayerCells.length >= onlyMoreDangerousAiCells.length))
+				)) {
 				return onlyMoreDangerousPlayerCells[Math.floor(Math.random()*onlyMoreDangerousPlayerCells.length)].index;
 			} else{
 				return onlyMoreDangerousAiCells[Math.floor(Math.random()*onlyMoreDangerousAiCells.length)].index;
