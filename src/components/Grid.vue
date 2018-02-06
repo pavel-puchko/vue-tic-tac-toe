@@ -249,7 +249,7 @@ export default {
 
 			if (
 				biggerAiCount < 5 &&
-				(biggerPlayerCount > 2 || biggerAiCount === 0) && 
+				(biggerPlayerCount > 3 || biggerAiCount === 0) && 
 				(
 					(biggerPlayerCount > biggerAiCount) || 
 					((biggerAiCount === biggerPlayerCount) && (onlyMoreDangerousPlayerCells.length >= onlyMoreDangerousAiCells.length))
