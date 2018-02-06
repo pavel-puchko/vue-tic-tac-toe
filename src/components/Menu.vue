@@ -3,6 +3,7 @@
     <h1>Tic Tac Toe</h1>
     <div class="main-menu">
       <button @click="startGame(3, 3)" class="button start-game">Create Classic Board</button>
+      <button @click="startGame(3, 3, true)" class="button start-game">Play Classic vs AI</button>
       <button @click="startGame(15, 5)" class="button start-game">Create Gomoku Board</button>
       <button @click="startGame(15, 5, true)" class="button start-game">Play Gomoku vs AI</button>
       <button v-if="lastVisitedRoomId" @click="backGame" class="button back-game">Back To Board</button>

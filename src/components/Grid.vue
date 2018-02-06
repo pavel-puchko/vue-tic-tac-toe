@@ -114,18 +114,16 @@ export default {
 							tempIndex = nextIndex;
 						} else {
 							if (cells[nextIndex] === '') {
-								const	count = markCount + 1;
+								let futureCount = markCount + 1;
 								let nextIndexAfterNextIndex = getNextIndexFunction(nextIndex);
-								let futureCount = 0;
 								while (nextIndexAfterNextIndex && cells[nextIndexAfterNextIndex] === activePlayer) {
 									futureCount += 1;
 									nextIndexAfterNextIndex = getNextIndexFunction(nextIndexAfterNextIndex);
 								}
 								const oneTurnNextMark = cells[getNextIndexFunction(nextIndex)] === activePlayer;
 								winMap.push({
-									count,
-									futureCount: count + futureCount,
 									index: nextIndex,
+									futureCount,
 								})
 							}
 							markCount = 0;
@@ -248,16 +246,53 @@ export default {
 			const onlyMoreDangerousAiCells = sortedAIWinMap.filter(p => p.futureCount === biggerAiCount);
 
 			if (
-				biggerAiCount < 5 &&
-				(biggerPlayerCount > 3 || biggerAiCount === 0) && 
+				biggerAiCount < this.room.winCount &&
+				(biggerPlayerCount > Math.ceil(this.room.winCount / 2) || biggerAiCount === 0) && 
 				(
 					(biggerPlayerCount > biggerAiCount) || 
 					((biggerAiCount === biggerPlayerCount) && (onlyMoreDangerousPlayerCells.length >= onlyMoreDangerousAiCells.length))
 				)) {
-				return onlyMoreDangerousPlayerCells[Math.floor(Math.random()*onlyMoreDangerousPlayerCells.length)].index;
+				return this.getBestCell(onlyMoreDangerousPlayerCells, sortedAIWinMap)
 			} else{
-				return onlyMoreDangerousAiCells[Math.floor(Math.random()*onlyMoreDangerousAiCells.length)].index;
+				return this.getBestCell(onlyMoreDangerousAiCells, sortedPlayerWinMap)
 			}
+		},
+
+		getBestCell(basicCells, altCells) {
+			const indexCountBasicMap = {};
+			basicCells.forEach((c) => {
+				if (indexCountBasicMap[c.index]) {
+					indexCountBasicMap[c.index].count += 1;
+				} else {
+					indexCountBasicMap[c.index] = {
+						index: c.index,
+						count: 1
+					};
+				}
+			});
+
+			const indexCountAltMap = {};
+			altCells.forEach((c) => {
+				if (indexCountAltMap[c.index]) {
+					indexCountAltMap[c.index].count += 1;
+				} else {
+					indexCountAltMap[c.index] = {
+						index: c.index,
+						count: 1
+					};
+				}
+			});
+
+			const sortedBestBasicCells = Object.values(indexCountBasicMap).sort((a,b) => b.count - a.count);
+			const sortedBestAltCells = Object.values(indexCountAltMap).sort((a,b) => b.count - a.count);
+
+			sortedBestBasicCells.forEach(bC => {
+				if (sortedBestAltCells.find(aC => aC.index === bC.index)) {
+					return  bC.index;
+				}
+			}) 
+
+			return sortedBestBasicCells[Math.floor(Math.random()*sortedBestBasicCells.length)].index;
 		}
   },
   created () {
